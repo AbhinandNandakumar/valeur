@@ -1,20 +1,29 @@
 import React, { useState } from 'react';
-import { auth, provider, signInWithPopup, signInWithEmailAndPassword } from './firebase';
+import { useNavigate } from 'react-router-dom';
+import { auth, provider, signInWithPopup, signInWithEmailAndPassword,sendEmailVerification } from './firebase';
 import google from './images/google.png';
 
-const Login = ({ onClose }) => {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      console.log('Logged in:', user);
-      alert(`Welcome back, ${user.email}`);
-      onClose(); // Close the login modal or redirect
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    if (!user.emailVerified) {
+      setError('Please verify your email before logging in. Check your inbox for the verification email.');
+      await auth.signOut();  // Force logout if not verified
+      return;
+    }
+
+    alert(`Welcome back, ${user.email}`);
+    navigate("/home");
+    
     } catch (error) {
       if (error.code === 'auth/user-not-found') {
         setError('No account found with this email.');
@@ -26,14 +35,28 @@ const Login = ({ onClose }) => {
       console.error('Login error:', error);
     }
   };
+  
+  const handleResendVerificationEmail = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        await sendEmailVerification(user);
+        alert('Verification email sent again. Please check your inbox.');
+      }
+    } catch (error) {
+      console.error('Error sending verification email:', error);
+      alert('Error sending verification email. Please try again later.');
+    }
+  };
+  
+  
 
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log('Google Login:', user);
-      alert(`Welcome, ${user.displayName}`);
-      onClose(); // Close the login modal or redirect
+      navigate("/home");
     } catch (error) {
       setError('Error signing in with Google.');
       console.error('Google sign-in error:', error);
@@ -63,6 +86,15 @@ const Login = ({ onClose }) => {
             className="w-full mb-3 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:ring-blue-500 text-gray-100"
             required
           />
+          {error === 'Please verify your email before logging in. Check your inbox for the verification email.' && (
+  <button
+    onClick={handleResendVerificationEmail}
+    className="text-blue-400 hover:underline mt-2 text-sm"
+  >
+    Resend Verification Email
+  </button>
+)}
+
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button type="submit" className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
             Login
@@ -75,10 +107,6 @@ const Login = ({ onClose }) => {
           Sign in with Google
         </button>
 
-        {/* Close Button */}
-        <button onClick={onClose} className="mt-4 text-gray-400 hover:text-gray-300 text-sm">
-          Close
-        </button>
       </div>
     </div>
   );

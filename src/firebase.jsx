@@ -1,11 +1,14 @@
-// src/firebase.js
-import { initializeApp } from 'firebase/app';
+import { 
+  initializeApp 
+} from 'firebase/app';
+
 import { 
   getAuth, 
   GoogleAuthProvider, 
   signInWithPopup,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword 
+  signInWithEmailAndPassword,
+  sendEmailVerification
 } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -27,5 +30,6 @@ export {
     provider, 
     signInWithPopup,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword 
+    signInWithEmailAndPassword,
+    sendEmailVerification
 };

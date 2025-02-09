@@ -4,7 +4,8 @@ import {
   auth, 
   provider, 
   signInWithPopup,
-  createUserWithEmailAndPassword 
+  createUserWithEmailAndPassword ,
+  sendEmailVerification
 } from './firebase';
 import google from './images/google.png';
 
@@ -19,8 +20,16 @@ const SignIn = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      
+      // Send verification email
+      await sendEmailVerification(user);
+  
       console.log('New User Created:', user);
-      alert(`Account created successfully! Welcome ${user.email}`);
+      alert(`Account created successfully! A verification email has been sent to ${user.email}. Please verify your email before logging in.`);
+      setEmail('');
+    setPassword('');
+    setError('');
+      
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
         setError('An account with this email already exists.');
@@ -34,7 +43,7 @@ const SignIn = () => {
       console.error('Error during sign-up:', error);
     }
   };
-
+  
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
