@@ -1,11 +1,11 @@
 import requests
-from bs4 import BeautifulSoup 
+from bs4 import BeautifulSoup
 import random
-import re
 import time
 
 class AmazonScraper:
-    def __init__(self):
+    def __init__(self, api_key):
+        self.api_key = api_key
         self.user_agents = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -15,33 +15,42 @@ class AmazonScraper:
     def _get_random_user_agent(self):
         return random.choice(self.user_agents)
 
-    def search_products(self, keyword):
-        """Search Amazon.in for products based on keyword"""
-        products = []
-        base_url = f"https://www.amazon.in/s?k={keyword.replace(' ', '+')}"
-        
-        url = f"{base_url}&page=1"
-        print(f"Scraping URL: {url}")
+    def _get_scraperapi_url(self, amazon_url):
+        """
+        Build ScraperAPI URL with key, rendering, and session rotation.
+        """
+        return f"https://api.scraperapi.com/?api_key={self.api_key}&url={amazon_url}&render=true"
+
+    def search_products(self, keyword, retries=3):
+        """Search Amazon.in for products based on keyword, using ScraperAPI"""
+        base_url = f"https://www.amazon.in/s?k={keyword.replace(' ', '+')}&page=1"
+        scraperapi_url = self._get_scraperapi_url(base_url)
 
         headers = {"User-Agent": self._get_random_user_agent()}
-        try:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                return self._parse_search_results(response.text)
-            else:
-                return {"error": f"Failed to fetch page. Status code: {response.status_code}"}
-        except Exception as e:
-            return {"error": str(e)}
-    
+        
+        for attempt in range(retries):
+            try:
+                response = requests.get(scraperapi_url, headers=headers, timeout=20)  # Increased timeout
+                if response.status_code == 200:
+                    return self._parse_search_results(response.text)
+                else:
+                    print(f"Attempt {attempt + 1}: Failed with status {response.status_code}")
+            except requests.exceptions.Timeout:
+                print(f"Attempt {attempt + 1}: ScraperAPI timeout error. Retrying...")
+            except requests.exceptions.RequestException as e:
+                print(f"Attempt {attempt + 1}: Error: {e}")
+        
+        return {"error": "Failed to fetch data from Amazon after multiple attempts"}
+
     def _parse_search_results(self, html):
         soup = BeautifulSoup(html, 'html.parser')
         products = []
-        
+
         for item in soup.select('div[data-asin]:not([data-asin=""])'):
             product = self._extract_product_info(item)
             if product:
                 products.append(product)
-                
+
         return products
 
     def _extract_product_info(self, item):
@@ -62,4 +71,3 @@ class AmazonScraper:
         rating = rating_element.text.strip() if rating_element else None
 
         return {"asin": asin, "title": title, "price": price, "rating": rating}
-

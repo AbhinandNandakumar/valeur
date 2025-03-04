@@ -3,11 +3,16 @@ import time
 from fastapi import FastAPI
 from amazon_scraper import AmazonScraper
 from snapdeal_scraper import SnapdealScraper
+from croma_scraper import CromaScraper
 from fastapi.middleware.cors import CORSMiddleware
 
+# Set your ScraperAPI key here
+SCRAPERAPI_KEY = "1e1fe6ea3984685acdfb3658408e08ed"
+
 app = FastAPI()
-amazon_scraper = AmazonScraper()
-snapdeal_scraper = SnapdealScraper()
+#amazon_scraper = AmazonScraper(api_key=SCRAPERAPI_KEY)  # Pass API key
+#snapdeal_scraper = SnapdealScraper()
+croma_scraper = CromaScraper(api_key=SCRAPERAPI_KEY)
 
 # Allow React frontend to communicate with backend
 app.add_middleware(
@@ -20,29 +25,32 @@ app.add_middleware(
 
 @app.get("/search")
 async def search_products(query: str):
+    print("hello")
     """
-    Fetch product details from both Amazon and Snapdeal.
+    Fetch product details from Amazon, Snapdeal, and Chroma.
     
     Args:
         query (str): The product search keyword.
         
     Returns:
-        dict: Contains Amazon and Snapdeal product lists.
+        dict: Contains Amazon, Snapdeal, and Chroma product lists.
     """
     if not query:
         return {"error": "Missing search query"}
     
     # Add delay to avoid rate limiting
-    time.sleep(random.uniform(1, 3))
-    
-    # Fetch results from both Amazon and Snapdeal
-    amazon_products = amazon_scraper.search_products(query)
-    print(amazon_products)
-    snapdeal_products = snapdeal_scraper.search_products(query)
+    time.sleep(random.uniform(2, 5))  # Increased delay for Amazon
+
+    # Fetch results from Snapdeal and Chroma
+    #amazon_products = amazon_scraper.search_products(query)  # Uses ScraperAPI
+    #print(amazon_products)
+    #snapdeal_products = snapdeal_scraper.search_products(query)
+    croma_products = croma_scraper.search_products(query)
 
     return {
-        "amazon_products": amazon_products,
-        "snapdeal_products": snapdeal_products
+       # "amazon_products": amazon_products,
+        #"snapdeal_products": snapdeal_products,
+        "croma_products": croma_products
     }
 
 if __name__ == "__main__":  
