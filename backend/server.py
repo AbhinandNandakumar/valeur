@@ -10,9 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 SCRAPERAPI_KEY = "1e1fe6ea3984685acdfb3658408e08ed"
 
 app = FastAPI()
-#amazon_scraper = AmazonScraper(api_key=SCRAPERAPI_KEY)  # Pass API key
-#snapdeal_scraper = SnapdealScraper()
-croma_scraper = CromaScraper(api_key=SCRAPERAPI_KEY)
+amazon_scraper = AmazonScraper(api_key=SCRAPERAPI_KEY)  # Pass API key
+snapdeal_scraper = SnapdealScraper()
+croma_scraper = CromaScraper()
 
 # Allow React frontend to communicate with backend
 app.add_middleware(
@@ -42,14 +42,14 @@ async def search_products(query: str):
     time.sleep(random.uniform(2, 5))  # Increased delay for Amazon
 
     # Fetch results from Snapdeal and Chroma
-    #amazon_products = amazon_scraper.search_products(query)  # Uses ScraperAPI
+    amazon_products = amazon_scraper.search_products(query)  # Uses ScraperAPI
     #print(amazon_products)
-    #snapdeal_products = snapdeal_scraper.search_products(query)
+    snapdeal_products = snapdeal_scraper.search_products(query)
     croma_products = croma_scraper.search_products(query)
-
+    #print("Croma Products:", croma_products)  # Debugging print
     return {
-       # "amazon_products": amazon_products,
-        #"snapdeal_products": snapdeal_products,
+        "amazon_products": amazon_products,
+        "snapdeal_products": snapdeal_products,
         "croma_products": croma_products
     }
 
