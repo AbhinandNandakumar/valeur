@@ -220,7 +220,8 @@ class CromaScraper:
                     default=""
                 )
             
-            image_url = container.find('img', {'class': 'product-image'}).get('src', 'No Image') if container.find('img', {'class': 'product-image'}) else "No Image"
+            image_element = container.select_one('div img')
+            image_url = image_element.get('src', 'No Image') if image_element else "No Image"
             
             return {
                # "product_id": product_id,
@@ -228,7 +229,7 @@ class CromaScraper:
                  "price": price,
                # "original_price": original_price,
                 "discount": discount ,
-                #"image_url": image_url,
+                "image_url": image_url,
                 "product_url": full_product_url
              }
         

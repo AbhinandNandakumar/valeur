@@ -2,6 +2,7 @@ import random
 import time
 from fastapi import FastAPI
 from amazon_scraper import AmazonScraper
+from flipkart_scraper import FlipkartScraper
 from snapdeal_scraper import SnapdealScraper
 from croma_scraper import CromaScraper
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +14,7 @@ app = FastAPI()
 amazon_scraper = AmazonScraper(api_key=SCRAPERAPI_KEY)  # Pass API key
 snapdeal_scraper = SnapdealScraper()
 croma_scraper = CromaScraper()
+flipkart_scraper = FlipkartScraper()
 
 # Allow React frontend to communicate with backend
 app.add_middleware(
@@ -43,14 +45,15 @@ async def search_products(query: str):
 
     # Fetch results from Snapdeal and Chroma
     amazon_products = amazon_scraper.search_products(query)  # Uses ScraperAPI
-    #print(amazon_products)
     snapdeal_products = snapdeal_scraper.search_products(query)
     croma_products = croma_scraper.search_products(query)
+    flipkart_products = flipkart_scraper.search_products(query) # Debugging print
     #print("Croma Products:", croma_products)  # Debugging print
     return {
         "amazon_products": amazon_products,
         "snapdeal_products": snapdeal_products,
-        "croma_products": croma_products
+        "croma_products": croma_products,
+        "flipkart_products": flipkart_products
     }
 
 if __name__ == "__main__":  

@@ -9,6 +9,7 @@ const Home = () => {
   const [amazonProducts, setAmazonProducts] = useState([]);
   const [snapdealProducts, setSnapdealProducts] = useState([]);
   const [cromaProducts, setCromaProducts] = useState([]);
+  const [flipkartProducts, setFlipkartProducts] = useState([]);
 
   const handleLogout = async () => {
     try {
@@ -20,7 +21,7 @@ const Home = () => {
   };
 
   const handleSearch = async (e) => {
-    console.log("hi")
+    console.log("hi");
     e.preventDefault();
     if (!searchQuery) return;
 
@@ -30,7 +31,8 @@ const Home = () => {
       );
       setAmazonProducts(response.data.amazon_products);
       setSnapdealProducts(response.data.snapdeal_products);
-       setCromaProducts(response.data.croma_products);
+      setCromaProducts(response.data.croma_products);
+      setFlipkartProducts(response.data.flipkart_products);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -67,7 +69,7 @@ const Home = () => {
       </form>
 
       {/* Display Results Side by Side */}
-      <div className="mt-8 grid grid-cols-3 gap-8 w-full max-w-7xl">
+      <div className="mt-8 grid grid-cols-4 gap-8 w-full max-w-7xl">
         {/* Amazon Results */}
         <div>
           <h2 className="text-xl font-bold text-blue-400 mb-4">Amazon Results</h2>
@@ -77,7 +79,15 @@ const Home = () => {
             <ul className="space-y-4">
               {amazonProducts.map((product, index) => (
                 <li key={index} className="p-4 bg-gray-800 rounded-lg shadow">
+                  {product.image_url && product.image_url !== "No Image" && (
+                    <img
+                      src={product.image_url}
+                      alt={product.title}
+                      className="w-32 h-32 object-cover mt-2 rounded"
+                    />
+                  )}
                   <h2 className="text-lg font-bold">{product.title}</h2>
+                  {console.log(product.image_url)}
                   <p>Price: {product.price}</p>
                   <p>Rating: {product.rating}</p>
                   <a
@@ -109,6 +119,13 @@ const Home = () => {
 
                 return (
                   <li key={index} className="p-4 bg-gray-800 rounded-lg shadow">
+                    {product.image_url && product.image_url !== "No Image" && (
+                    <img
+                      src={product.image_url}
+                      alt={product.title}
+                      className="w-32 h-32 object-cover mt-2 rounded"
+                    />
+                  )}
                     <h2 className="text-lg font-bold">{product.title}</h2>
                     <p>Price: {product.price}</p>
                     <p>Rating: {product.rating}</p>
@@ -133,39 +150,95 @@ const Home = () => {
 
         {/* Chroma Results */}
         {/* Croma Results */}
-<div>
-  <h2 className="text-xl font-bold text-green-400 mb-4">Croma Results</h2>
-  {cromaProducts.length > 0 ? (
-    <ul className="space-y-4">
-      {cromaProducts.map((product, index) => (
-        <li key={index} className="p-4 bg-gray-800 rounded-lg shadow">
-          <h2 className="text-lg font-bold">{product.title || "No Title"}</h2>
-          <p>Price: ₹{product.price || "N/A"}</p>
-          {product.original_price && (
-            <p className="line-through text-gray-400">Original: ₹{product.original_price}</p>
+        <div>
+          <h2 className="text-xl font-bold text-green-400 mb-4">
+            Croma Results
+          </h2>
+          {cromaProducts.length > 0 ? (
+            <ul className="space-y-4">
+              {cromaProducts.map((product, index) => (
+                <li key={index} className="p-4 bg-gray-800 rounded-lg shadow">
+                  <h2 className="text-lg font-bold">
+                    {product.title || "No Title"}
+                  </h2>
+                  <p>Price: ₹{product.price || "N/A"}</p>
+                  {product.original_price && (
+                    <p className="line-through text-gray-400">
+                      Original: ₹{product.original_price}
+                    </p>
+                  )}
+                  {product.discount && (
+                    <p className="text-yellow-400">
+                      Discount: {product.discount}
+                    </p>
+                  )}
+                  {product.image_url && product.image_url !== "No Image" && (
+                    <img
+                      src={product.image_url}
+                      alt={product.title}
+                      className="w-32 h-32 object-cover mt-2 rounded"
+                    />
+                  )}
+                  {product.product_url && (
+                    <a
+                      href={product.product_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-green-400 block mt-2"
+                    >
+                      View on Croma
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-400">No Croma products found</p>
           )}
-          {product.discount && <p className="text-yellow-400">Discount: {product.discount}</p>}
-          {product.image_url && product.image_url !== "No Image" && (
-            <img src={product.image_url} alt={product.title} className="w-32 h-32 object-cover mt-2 rounded" />
-          )}
-          {product.product_url && (
-            <a
-              href={product.product_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-green-400 block mt-2"
-            >
-              View on Croma
-            </a>
-          )}
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <p className="text-gray-400">No Croma products found</p>
-  )}
-</div>
+        </div>
 
+        {/* Flipkart Results */}
+        <div>
+          <h2 className="text-xl font-bold text-purple-400 mb-4">
+            Flipkart Results
+          </h2>
+          {flipkartProducts.length > 0 ? (
+            <ul className="space-y-4">
+              {flipkartProducts.map((product, index) => (
+                <li key={index} className="p-4 bg-gray-800 rounded-lg shadow">
+                  <h2 className="text-lg font-bold">
+                    {product.title || "No Title"}
+                  </h2>
+                  <p>Price: ₹{product.price || "N/A"}</p>
+                  {product.discount && (
+                    <p className="text-yellow-400">
+                      Discount: {product.discount}
+                    </p>
+                  )}
+                  {product.image_url && product.image_url !== "No Image" && (
+                    <img
+                      src={product.image_url}
+                      alt={product.title}
+                      className="w-32 h-32 object-cover mt-2 rounded"
+                    />
+                  )}
+                  {product.product_url && (
+                    <a
+                      href={product.product_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-purple-400 block mt-2"
+                    >
+                      View on Flipkart
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-400">No Flipkart products found</p>
+          )}
+        </div>
       </div>
     </div>
   );

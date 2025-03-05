@@ -48,7 +48,7 @@ class AmazonScraper:
 
         for item in soup.select('div[data-asin]:not([data-asin=""])'):
             product = self._extract_product_info(item)
-            if product:
+            if product and all(product.values()):
                 products.append(product)
 
         return products
@@ -60,8 +60,12 @@ class AmazonScraper:
         asin = item.get('data-asin')
         if not asin:
             return None
+        
+        image_element = item.find('img', {'class': 's-image'})
+        image_url = image_element.get('src', 'No Image') if image_element else "No Image"
+        print("IMG",image_url)
 
-        title_element = item.select_one('h2 a span')
+        title_element = item.select_one('h2 span')
         title = title_element.text.strip() if title_element else None
 
         price_element = item.select_one('.a-price .a-offscreen')
@@ -70,4 +74,4 @@ class AmazonScraper:
         rating_element = item.select_one('i[class*="a-star"] span')
         rating = rating_element.text.strip() if rating_element else None
 
-        return {"asin": asin, "title": title, "price": price, "rating": rating}
+        return {"asin": asin, "title": title, "price": price, "rating": rating, "image_url": image_url}
