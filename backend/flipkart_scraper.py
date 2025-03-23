@@ -171,14 +171,21 @@ class FlipkartScraper:
             return [{"error": f"Search failed: {str(e)}"}]
     
     def _parse_search_results(self, html: str) -> List[Dict[str, str]]:
-        """Robust parsing with comprehensive error handling"""
         soup = BeautifulSoup(html, 'html.parser')
         products = []
-        
-        # Use the updated class name for product containers
-        product_containers = soup.find_all('div', class_='slAVV4')
-        print("KJJJJ", product_containers)
-        
+
+    # Multiple possible product container classes based on category
+        container_classes = ['slAVV4', 'tUxRFH', '_13oc-S']
+
+    # Try to find products using multiple container classes
+        product_containers = []
+        for class_name in container_classes:
+            product_containers = soup.find_all('div', class_=class_name)
+            if product_containers:
+                break  # Stop once we find products
+
+        print("Found product containers:", product_containers)
+
         for container in product_containers:
             try:
                 product = self._extract_product_info(container)
@@ -186,32 +193,53 @@ class FlipkartScraper:
                     products.append(product)
             except Exception as e:
                 self.logger.warning(f"Product extraction error: {e}")
-        
+
         return products
+
     
     def _extract_product_info(self, container) -> Dict[str, str]:
-        """Comprehensive product info extraction with robust fallbacks"""
+    
         try:
-            # Extract product title using the new class name
-            title_element = container.find('a', class_='wjcEIp')
+            # Multiple class names for product title
+            title_classes = ['wjcEIp', '_4rR01T', 'IRpwTa']
+            title_element = None
+            for class_name in title_classes:
+                title_element = container.find('a', class_=class_name)
+                if title_element:
+                    break  # Stop if found
             title = title_element.text.strip() if title_element else "N/A"
-            
+
             # Extract product URL
             product_url = title_element.get('href', '') if title_element else ''
             full_product_url = f"https://www.flipkart.com{product_url}" if product_url else "No URL"
-            
-            # Extract price
-            price_element = container.find('div', {'class': 'Nx9bqj'})
+
+            # Multiple class names for price
+            price_classes = ['Nx9bqj', '_30jeq3', '_1_WHN1']
+            price_element = None
+            for class_name in price_classes:
+                price_element = container.find('div', class_=class_name)
+                if price_element:
+                    break
             price = price_element.text.strip().replace('₹', '').replace(',', '') if price_element else "N/A"
-            
-            # Extract discount
-            discount_element = container.find('div', {'class': 'UkUFwK'})
+
+            # Multiple class names for discount
+            discount_classes = ['UkUFwK', '_3Ay6Sb']
+            discount_element = None
+            for class_name in discount_classes:
+                discount_element = container.find('div', class_=class_name)
+                if discount_element:
+                    break
             discount = discount_element.text.strip() if discount_element else "N/A"
-            
-            # Extract image URL
-            image_element = container.find('img', {'class': 'DByuf4'})
+
+            # Multiple class names for image
+            image_classes = ['DByuf4', '_396cs4', '_2r_T1I']
+            image_element = None
+            for class_name in image_classes:
+                image_element = container.find('img', class_=class_name)
+                if image_element:
+                    break
             image_url = image_element.get('src', 'No Image') if image_element else "No Image"
-            
+
             return {
                 "title": title,
                 "price": price,
@@ -219,10 +247,11 @@ class FlipkartScraper:
                 "image_url": image_url,
                 "product_url": full_product_url
             }
-        
+
         except Exception as e:
-            self.logger.warning(f"Detailed product info extraction error: {e}")
+            self.logger.warning(f"Product info extraction error: {e}")
             return {}
+
 
 # FastAPI setup remains the same
 app = FastAPI()
