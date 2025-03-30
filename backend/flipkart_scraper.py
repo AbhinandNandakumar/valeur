@@ -116,7 +116,7 @@ class FlipkartScraper:
         except Exception as e:
             self.logger.warning(f"Browsing simulation error: {e}")
     
-    def search_products(self, keyword: str, max_products: int = 10) -> List[Dict[str, Any]]:
+    def search_products(self, keyword: str, max_products: int = 15) -> List[Dict[str, Any]]:
         """Enhanced product search with improved detection avoidance"""
         if not self._setup_driver():
             return [{"error": "Failed to setup WebDriver"}]

@@ -1,4 +1,12 @@
 @import "tailwindcss";
 body {
+  font-family: "Quicksand", sans-serif;
   background-color: #111827;
 }
+.main-name {
+  font-family: "Tektur", sans-serif;
+}
+.tag-name {
+  font-family: "Kaushan Script", cursive;
+}
+

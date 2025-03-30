@@ -26,36 +26,52 @@ app.add_middleware(
 )
 
 @app.get("/search")
-async def search_products(query: str):
-    print("hello")
+async def search_products(query: str, sites: str = "1,2,3,4"):
     """
-    Fetch product details from Amazon, Snapdeal, and Chroma.
+    Fetch product details from selected e-commerce sites.
     
     Args:
         query (str): The product search keyword.
+        sites (str): Comma-separated list of site identifiers to scrape.
+                    1=Amazon, 2=Snapdeal, 3=Croma, 4=Flipkart
         
     Returns:
-        dict: Contains Amazon, Snapdeal, and Chroma product lists.
+        dict: Contains product lists from the selected sites.
     """
     if not query:
         return {"error": "Missing search query"}
     
+    # Parse selected sites
+    site_list = sites.split(',')
+    
+    # Initialize results
+    results = {}
+    
     # Add delay to avoid rate limiting
-    time.sleep(random.uniform(2, 5))  # Increased delay for Amazon
-
-    # Fetch results from Snapdeal and Chroma
-    amazon_products = amazon_scraper.search_products(query)  # Uses ScraperAPI
-    snapdeal_products = snapdeal_scraper.search_products(query)
-    croma_products = croma_scraper.search_products(query)
-    flipkart_products = flipkart_scraper.search_products(query) # Debugging print
-    #print("Croma Products:", croma_products)  # Debugging print
-    #print("Flipkart :",flipkart_products)
-    return {
-        "amazon_products": amazon_products,
-        "snapdeal_products": snapdeal_products,
-        "croma_products": croma_products,
-        "flipkart_products": flipkart_products
-    }
+    time.sleep(random.uniform(1, 3))
+    
+    # Fetch results from selected sites
+    if "1" in site_list:  # Amazon
+        results["amazon_products"] = amazon_scraper.search_products(query)
+    else:
+        results["amazon_products"] = []
+        
+    if "2" in site_list:  # Snapdeal
+        results["snapdeal_products"] = snapdeal_scraper.search_products(query)
+    else:
+        results["snapdeal_products"] = []
+        
+    if "3" in site_list:  # Croma
+        results["croma_products"] = croma_scraper.search_products(query)
+    else:
+        results["croma_products"] = []
+        
+    if "4" in site_list:  # Flipkart
+        results["flipkart_products"] = flipkart_scraper.search_products(query)
+    else:
+        results["flipkart_products"] = []
+    
+    return results
 
 if __name__ == "__main__":  
     import uvicorn

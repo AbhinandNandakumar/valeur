@@ -59,8 +59,8 @@ const SignIn = () => {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-900 p-4 relative">
       {/* Decorative graphics */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-900/20 to-purple-900/20 z-0"></div>
-      <div className="absolute bottom-0 right-0 w-full h-32 bg-gradient-to-l from-blue-900/20 to-purple-900/20 z-0"></div>
+      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r z-0"></div>
+      <div className="absolute bottom-0 right-0 w-full h-32 bg-gradient-to-l z-0"></div>
       
       {/* Login Button (Top Right Corner) */}
       <button 
@@ -74,13 +74,19 @@ const SignIn = () => {
       </button>
 
       {/* Main content box with brand identity */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg mb-4">
-            <span className="text-2xl font-bold text-white">PC</span>
+      <div className="relative z-10 w-full max-w-md mt-3">
+        <div className="mb-6 text-center">
+        <div className="flex items-center justify-center mb-4">
+        <img className="mt-1" src="/logo1.jpg" alt="logo" width="70" height="70" />
+          <div className='flex flex-col items-start ml-5'>
+          
+          <h1  className='text-gray-400 font-bold text-3xl main-name'>VALEUR</h1>
+          <h3  className='text-gray-400 tag-name '>Your Priceless Destination</h3>
+
           </div>
-          <h1 className="text-3xl font-bold text-white">Valeur</h1>
-          <p className="text-gray-400 mt-2">Create your account to start saving</p>
+              
+
+            </div>
         </div>
         
         <div className="bg-gray-800/90 backdrop-blur-sm p-8 rounded-xl shadow-2xl border border-gray-700">
