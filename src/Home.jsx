@@ -271,7 +271,7 @@ const Home = () => {
                       )}
                     </div>
                     <h3 className="text-md font-bold line-clamp-2 mb-2">{product.title || "No Title"}</h3>
-                    <div className="mb-2">
+                    <div className="flex justify-between items-center mb-2">
                       <span className="text-lg font-bold text-green-400">₹{product.price || "N/A"}</span>
                       {product.original_price && (
                         <span className="line-through text-gray-400 text-sm ml-2">

@@ -49,6 +49,7 @@ async def search_products(query: str):
     croma_products = croma_scraper.search_products(query)
     flipkart_products = flipkart_scraper.search_products(query) # Debugging print
     #print("Croma Products:", croma_products)  # Debugging print
+    #print("Flipkart :",flipkart_products)
     return {
         "amazon_products": amazon_products,
         "snapdeal_products": snapdeal_products,

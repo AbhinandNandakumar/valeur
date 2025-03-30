@@ -145,7 +145,9 @@ class FlipkartScraper:
             # Wait for products with longer timeout
             wait = WebDriverWait(self.driver, 20)
             wait.until(
-                EC.presence_of_all_elements_located((By.CLASS_NAME, 'slAVV4'))
+                 EC.presence_of_all_elements_located(
+        (By.XPATH, "//*[@class='slAVV4' or @class='tUxRFH']")
+    )
             )
             
             # Simulate human-like browsing
@@ -201,17 +203,34 @@ class FlipkartScraper:
     
         try:
             # Multiple class names for product title
-            title_classes = ['wjcEIp', '_4rR01T', 'IRpwTa']
+            title_classes = ['wjcEIp', 'KzDlHZ', 'IRpwTa']
             title_element = None
             for class_name in title_classes:
-                title_element = container.find('a', class_=class_name)
+                title_element = container.find('a', class_=class_name) or container.find('div',class_ = class_name)
                 if title_element:
                     break  # Stop if found
             title = title_element.text.strip() if title_element else "N/A"
+            #print("Mobile Phone",title)
 
             # Extract product URL
-            product_url = title_element.get('href', '') if title_element else ''
+            #product_url = title_element.get('href', '') if title_element else container.find('a',class_="CGtC98").get('href', '') 
+
+
+
+            product_url = None
+            if title_element :
+                product_url = title_element.get('href', '')
+        
+        # If first approach didn't work, try second approach
+            if not product_url:
+                alt_url_element = container.find('a', class_="CGtC98")
+                if alt_url_element:
+                    product_url = alt_url_element.get('href', '')
+
+
+
             full_product_url = f"https://www.flipkart.com{product_url}" if product_url else "No URL"
+            #print(full_product_url)
 
             # Multiple class names for price
             price_classes = ['Nx9bqj', '_30jeq3', '_1_WHN1']
@@ -221,6 +240,7 @@ class FlipkartScraper:
                 if price_element:
                     break
             price = price_element.text.strip().replace('₹', '').replace(',', '') if price_element else "N/A"
+           # print(price)
 
             # Multiple class names for discount
             discount_classes = ['UkUFwK', '_3Ay6Sb']
@@ -230,6 +250,7 @@ class FlipkartScraper:
                 if discount_element:
                     break
             discount = discount_element.text.strip() if discount_element else "N/A"
+            #print(discount)
 
             # Multiple class names for image
             image_classes = ['DByuf4', '_396cs4', '_2r_T1I']
@@ -239,6 +260,7 @@ class FlipkartScraper:
                 if image_element:
                     break
             image_url = image_element.get('src', 'No Image') if image_element else "No Image"
+            #print(image_url)
 
             return {
                 "title": title,

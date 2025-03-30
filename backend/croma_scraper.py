@@ -197,8 +197,9 @@ class CromaScraper:
         
         try:
             # Carefully construct search URL
-            safe_keyword = '+'.join(keyword.split())
-            search_url = f"https://www.croma.com/search/?text={safe_keyword}&sort=relevance"
+            safe_keyword = '%20'.join(keyword.split())  # Ensure proper encoding
+            search_url = f"https://www.croma.com/searchB?q={safe_keyword}%3Arelevance&text={safe_keyword}"
+            print(search_url)
             
             # Navigate with delays
             self.driver.get("https://www.croma.com")

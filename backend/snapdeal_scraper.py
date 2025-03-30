@@ -160,5 +160,3 @@ class SnapdealScraper:
         except Exception as e:
             print(f"Error extracting product info: {str(e)}")
             return None
-
-
