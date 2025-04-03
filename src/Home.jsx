@@ -76,7 +76,7 @@ const Home = () => {
         .join(',');
 
       const response = await axios.get(
-        `http://127.0.0.1:8000/search?query=${searchQuery}&sites=${selectedSitesParam}`
+        `https://valeur.onrender.com/search?query=${searchQuery}&sites=${selectedSitesParam}`
       );
       
       // Sort products by price (lowest first) before setting state
