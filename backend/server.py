@@ -6,6 +6,7 @@ from flipkart_scraper import FlipkartScraper
 from snapdeal_scraper import SnapdealScraper
 from croma_scraper import CromaScraper
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 # Set your ScraperAPI key here
 SCRAPERAPI_KEY = "1e1fe6ea3984685acdfb3658408e08ed"
@@ -72,6 +73,10 @@ async def search_products(query: str, sites: str = "1,2,3,4"):
         results["flipkart_products"] = []
     
     return results
+
+@app.get("/keep-alive")
+def keep_alive():
+    return JSONResponse(content={"status": "Server is alive"})
 
 if __name__ == "__main__":  
     import uvicorn
