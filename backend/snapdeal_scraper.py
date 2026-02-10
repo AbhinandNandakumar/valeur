@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import random
 import time
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -19,9 +20,11 @@ class SnapdealScraper:
         ]
         # Initialize Selenium options.
         self.chrome_options = Options()
-        self.chrome_options.add_argument("--headless")
+        self.chrome_options.add_argument("--headless=new")
         self.chrome_options.add_argument("--no-sandbox")
         self.chrome_options.add_argument("--disable-dev-shm-usage")
+        self.chrome_options.add_argument("--disable-gpu")
+        self.chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         
     def _get_random_user_agent(self):
         return random.choice(self.user_agents)
@@ -69,9 +72,21 @@ class SnapdealScraper:
     def _search_with_selenium(self, url, wait_time, limit):
         """Use Selenium to wait for dynamic content to load"""
         try:
+            import os
             # Set up the driver with random user agent
             self.chrome_options.add_argument(f"user-agent={self._get_random_user_agent()}")
-            driver = webdriver.Chrome(options=self.chrome_options)
+
+            # Use system Chromium if available (Docker/Render), else default
+            chrome_bin = os.environ.get('CHROME_BIN')
+            chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
+            if chrome_bin:
+                self.chrome_options.binary_location = chrome_bin
+            if chromedriver_path:
+                service = Service(chromedriver_path)
+            else:
+                from webdriver_manager.chrome import ChromeDriverManager
+                service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=self.chrome_options)
             
             # Navigate to the URL
             driver.get(url)
