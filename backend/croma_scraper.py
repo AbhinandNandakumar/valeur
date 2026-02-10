@@ -60,8 +60,8 @@ class CromaScraper:
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
         
-        # Set page load strategy to ensure complete page loading
-        options.page_load_strategy = 'normal'
+        # Use eager strategy - don't wait for images/subresources
+        options.page_load_strategy = 'eager'
         
         return options
     
@@ -103,101 +103,25 @@ class CromaScraper:
         return False
     
     def _simulate_human_browsing(self):
-        """Simulate more human-like browsing behavior with multiple scroll pauses"""
+        """Quick scroll to trigger lazy-loaded content"""
         try:
-            # Get total height of page
-            total_height = self.driver.execute_script("""
-                return Math.max(
-                    document.body.scrollHeight, 
-                    document.body.offsetHeight, 
-                    document.documentElement.clientHeight, 
-                    document.documentElement.scrollHeight, 
-                    document.documentElement.offsetHeight
-                );
-            """)
-            
-            # Scroll in multiple steps with pauses
-            window_height = self.driver.execute_script("return window.innerHeight")
-            scrolls_needed = max(3, total_height // window_height)
-            
-            for i in range(scrolls_needed):
-                # Calculate scroll position
-                scroll_top = (i / scrolls_needed) * total_height
-                
-                # Scroll to position
-                self.driver.execute_script(f"window.scrollTo(0, {scroll_top});")
-                
-                # Longer pause after each scroll to allow images to load
-                time.sleep(random.uniform(0.5, 3))
-            
-            # Scroll back to top
-            self.driver.execute_script("window.scrollTo(0, 0);")
-            time.sleep(1)
-            
-            # Scroll all the way down once more
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(1)
-            
-            # Scroll halfway up
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight/2);")
-            time.sleep(1)
+            self.driver.execute_script("window.scrollTo(0, 0);")
+            time.sleep(0.5)
         except Exception as e:
             self.logger.warning(f"Browsing simulation error: {e}")
     
     def _wait_for_images_to_load(self):
-        """Enhanced method to ensure all images are fully loaded"""
+        """Wait for product items to be present"""
         try:
-            # Initial delay to allow page resources to be requested
-            time.sleep(5)
-            
-            # First check all product items are present
-            WebDriverWait(self.driver, 20).until(
+            WebDriverWait(self.driver, 15).until(
                 EC.presence_of_all_elements_located((By.CLASS_NAME, 'product-item'))
             )
-            
-            # Explicitly wait for image elements inside product items
-            WebDriverWait(self.driver, 20).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.product-item img'))
-            )
-            
-            # Execute JavaScript to check if images are loaded
-            # More sophisticated check that counts loaded vs total images
-            script = """
-            const images = Array.from(document.querySelectorAll('.product-item img'));
-            const totalImages = images.length;
-            const loadedImages = images.filter(img => img.complete && img.naturalHeight !== 0).length;
-            return {
-                total: totalImages,
-                loaded: loadedImages,
-                allLoaded: totalImages === loadedImages && totalImages > 0
-            };
-            """
-            
-            # Try multiple times with longer delays
-            max_attempts = 1
-            for attempt in range(max_attempts):
-                img_status = self.driver.execute_script(script)
-                
-                self.logger.info(f"Image status: {img_status['loaded']}/{img_status['total']} loaded")
-                
-                if img_status['allLoaded']:
-                    self.logger.info(f"All {img_status['total']} images are loaded")
-                    break
-                else:
-                    self.logger.info(f"Waiting for images to load (attempt {attempt+1}/{max_attempts})")
-                    # Increase wait time for each attempt
-                    time.sleep(3 + attempt)
-            
-            # Force any lazy-loaded images to load by scrolling again
-            self._simulate_human_browsing()
-            
-            # Final extended delay to ensure everything is loaded
-            time.sleep(5)
-            
+            time.sleep(2)
         except Exception as e:
-            self.logger.warning(f"Error while waiting for images: {e}")
-            # Fallback longer delay in case of error
-            time.sleep(10)
+            self.logger.warning(f"Error while waiting for products: {e}")
+            time.sleep(3)
     
     def search_products(self, keyword: str, max_products: int = 15) -> List[Dict[str, Any]]:
         """Enhanced product search with improved detection avoidance"""
@@ -208,27 +132,20 @@ class CromaScraper:
             # Carefully construct search URL
             safe_keyword = '%20'.join(keyword.split())  # Ensure proper encoding
             search_url = f"https://www.croma.com/searchB?q={safe_keyword}%3Arelevance&text={safe_keyword}"
-            print(search_url)
-            
-            # Navigate with delays
-            self.driver.get("https://www.croma.com")
-            time.sleep(random.uniform(2, 4))
-            
-            # Actual search navigation
+            self.logger.info(f"Searching: {search_url}")
+
+            # Go directly to search URL (skip homepage to save time)
             self.driver.get(search_url)
-            
-            # Wait for page to load completely
-            WebDriverWait(self.driver, 30).until(
+
+            # Wait for products to appear
+            WebDriverWait(self.driver, 20).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'product-item'))
             )
-            
-            # Initial delay after page load
-            time.sleep(5)
-            
-            # Simulate human-like browsing
+
+            # Quick scroll to load lazy content
             self._simulate_human_browsing()
-            
-            # Wait specifically for images to load with enhanced method
+
+            # Wait for product data
             self._wait_for_images_to_load()
             
             # Extract page source after ensuring images are loaded
