@@ -36,6 +36,7 @@ class FlipkartScraper:
         
         # Stealth and anti-detection configurations
         stealth_args = [
+            "--headless=new",
             "--disable-blink-features=AutomationControlled",
             "--disable-extensions",
             "--no-sandbox",
@@ -146,7 +147,7 @@ class FlipkartScraper:
             wait = WebDriverWait(self.driver, 20)
             wait.until(
                  EC.presence_of_all_elements_located(
-        (By.XPATH, "//*[@class='slAVV4' or @class='tUxRFH']")
+        (By.XPATH, "//*[@class='lvJbLV col-12-12' or @class='slAVV4' or @class='tUxRFH']")
     )
             )
             
@@ -177,7 +178,7 @@ class FlipkartScraper:
         products = []
 
     # Multiple possible product container classes based on category
-        container_classes = ['slAVV4', 'tUxRFH', '_13oc-S']
+        container_classes = ['lvJbLV', 'slAVV4', 'tUxRFH', '_13oc-S']
 
     # Try to find products using multiple container classes
         product_containers = []
@@ -191,7 +192,7 @@ class FlipkartScraper:
         for container in product_containers:
             try:
                 product = self._extract_product_info(container)
-                if product and product.get('title'):
+                if product and product.get('title') and product.get('title') != 'N/A' and product.get('price') != 'N/A' and product.get('image_url') != 'No Image':
                     products.append(product)
             except Exception as e:
                 self.logger.warning(f"Product extraction error: {e}")
@@ -203,7 +204,7 @@ class FlipkartScraper:
     
         try:
             # Multiple class names for product title
-            title_classes = ['wjcEIp', 'KzDlHZ', 'IRpwTa']
+            title_classes = ['RG5Slk', 'wjcEIp', 'KzDlHZ', 'IRpwTa']
             title_element = None
             for class_name in title_classes:
                 title_element = container.find('a', class_=class_name) or container.find('div',class_ = class_name)
@@ -223,7 +224,7 @@ class FlipkartScraper:
         
         # If first approach didn't work, try second approach
             if not product_url:
-                alt_url_element = container.find('a', class_="CGtC98")
+                alt_url_element = container.find('a', class_="CGtC98") or container.find('a', class_="k7wcnx")
                 if alt_url_element:
                     product_url = alt_url_element.get('href', '')
 
@@ -233,7 +234,7 @@ class FlipkartScraper:
             #print(full_product_url)
 
             # Multiple class names for price
-            price_classes = ['Nx9bqj', '_30jeq3', '_1_WHN1']
+            price_classes = ['hZ3P6w', 'Nx9bqj', '_30jeq3', '_1_WHN1']
             price_element = None
             for class_name in price_classes:
                 price_element = container.find('div', class_=class_name)
@@ -243,7 +244,7 @@ class FlipkartScraper:
            # print(price)
 
             # Multiple class names for discount
-            discount_classes = ['UkUFwK', '_3Ay6Sb']
+            discount_classes = ['HQe8jr', 'UkUFwK', '_3Ay6Sb']
             discount_element = None
             for class_name in discount_classes:
                 discount_element = container.find('div', class_=class_name)
@@ -253,7 +254,7 @@ class FlipkartScraper:
             #print(discount)
 
             # Multiple class names for image
-            image_classes = ['DByuf4', '_396cs4', '_2r_T1I']
+            image_classes = ['UCc1lI', 'DByuf4', '_396cs4', '_2r_T1I']
             image_element = None
             for class_name in image_classes:
                 image_element = container.find('img', class_=class_name)

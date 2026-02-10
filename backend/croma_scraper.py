@@ -36,6 +36,7 @@ class CromaScraper:
         
         # Stealth and anti-detection configurations
         stealth_args = [
+            "--headless=new",
             "--disable-blink-features=AutomationControlled",
             "--disable-extensions",
             "--no-sandbox",
