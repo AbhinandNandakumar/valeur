@@ -67,8 +67,16 @@ class FlipkartScraper:
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                # Use webdriver manager to handle driver installation
-                service = Service(ChromeDriverManager().install())
+                # Use system Chromium if available (Docker/Render), else webdriver_manager
+                import os
+                chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
+                chrome_bin = os.environ.get('CHROME_BIN')
+                if chrome_bin:
+                    self.chrome_options.binary_location = chrome_bin
+                if chromedriver_path:
+                    service = Service(chromedriver_path)
+                else:
+                    service = Service(ChromeDriverManager().install())
                 self.driver = webdriver.Chrome(service=service, options=self.chrome_options)
                 
                 # Additional stealth technique
