@@ -57,17 +57,20 @@ class SnapdealScraper:
             "Accept-Encoding": "gzip, deflate, br",
             "Connection": "keep-alive"
         }
-        
+
         try:
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, timeout=15)
+            print(f"Snapdeal requests response status: {response.status_code}")
             if response.status_code == 200:
-                # Add a short delay to emulate page loading
-                time.sleep(3)
-                return self._parse_search_results(response.text, limit)
+                results = self._parse_search_results(response.text, limit)
+                print(f"Snapdeal requests parsed {len(results)} products")
+                return results
             else:
-                return {"error": f"Failed to fetch page. Status code: {response.status_code}"}
+                print(f"Snapdeal requests failed with status: {response.status_code}")
+                return []
         except Exception as e:
-            return {"error": str(e)}
+            print(f"Snapdeal requests error: {str(e)}")
+            return []
     
     def _search_with_selenium(self, url, wait_time, limit):
         """Use Selenium to wait for dynamic content to load"""
@@ -109,11 +112,12 @@ class SnapdealScraper:
             
             return self._parse_search_results(html, limit)
         except Exception as e:
-            print(f"Error with Selenium: {str(e)}, falling back to requests")
+            print(f"Selenium failed: {str(e)}, falling back to requests")
             if 'driver' in locals():
                 driver.quit()
             # Fallback to requests-based scraping
-            return self._search_with_requests(url, limit)
+            results = self._search_with_requests(url, limit)
+            return results if isinstance(results, list) else []
     
     def _scroll_page(self, driver):
         """Scroll down to load just enough products"""
