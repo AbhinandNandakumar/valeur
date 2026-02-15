@@ -109,10 +109,11 @@ class SnapdealScraper:
             
             return self._parse_search_results(html, limit)
         except Exception as e:
-            print(f"Error with Selenium: {str(e)}")
+            print(f"Error with Selenium: {str(e)}, falling back to requests")
             if 'driver' in locals():
                 driver.quit()
-            return {"error": str(e)}
+            # Fallback to requests-based scraping
+            return self._search_with_requests(url, limit)
     
     def _scroll_page(self, driver):
         """Scroll down to load just enough products"""
