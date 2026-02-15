@@ -12,7 +12,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 class SnapdealScraper:
-    def __init__(self):
+    def __init__(self, api_key=None):
+        self.api_key = api_key
         self.user_agents = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -65,11 +66,35 @@ class SnapdealScraper:
                 results = self._parse_search_results(response.text, limit)
                 print(f"Snapdeal requests parsed {len(results)} products")
                 return results
+            elif response.status_code == 403 and self.api_key:
+                # Blocked by Snapdeal, try ScraperAPI
+                print("Snapdeal blocked (403), trying ScraperAPI...")
+                return self._search_with_scraperapi(url, limit)
             else:
                 print(f"Snapdeal requests failed with status: {response.status_code}")
                 return []
         except Exception as e:
             print(f"Snapdeal requests error: {str(e)}")
+            if self.api_key:
+                return self._search_with_scraperapi(url, limit)
+            return []
+
+    def _search_with_scraperapi(self, url, limit):
+        """Use ScraperAPI to bypass IP blocks"""
+        try:
+            scraperapi_url = f"https://api.scraperapi.com/?api_key={self.api_key}&url={url}"
+            headers = {"User-Agent": self._get_random_user_agent()}
+            response = requests.get(scraperapi_url, headers=headers, timeout=30)
+            print(f"Snapdeal ScraperAPI response status: {response.status_code}")
+            if response.status_code == 200:
+                results = self._parse_search_results(response.text, limit)
+                print(f"Snapdeal ScraperAPI parsed {len(results)} products")
+                return results
+            else:
+                print(f"Snapdeal ScraperAPI failed with status: {response.status_code}")
+                return []
+        except Exception as e:
+            print(f"Snapdeal ScraperAPI error: {str(e)}")
             return []
     
     def _search_with_selenium(self, url, wait_time, limit):

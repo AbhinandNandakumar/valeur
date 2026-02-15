@@ -13,7 +13,7 @@ SCRAPERAPI_KEY = "1e1fe6ea3984685acdfb3658408e08ed"
 
 app = FastAPI()
 amazon_scraper = AmazonScraper(api_key=SCRAPERAPI_KEY)  # Pass API key
-snapdeal_scraper = SnapdealScraper()
+snapdeal_scraper = SnapdealScraper(api_key=SCRAPERAPI_KEY)
 croma_scraper = CromaScraper()
 flipkart_scraper = FlipkartScraper()
 
